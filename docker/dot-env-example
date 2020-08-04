@@ -1,0 +1,8 @@
+﻿# copy it to .env
+
+USER = "my_user"
+GH = "my_github_user"
+
+SSH_PUB_KEYS = "ssh-rsa xxxxxxx id_for_key"
+
+VM_BOX = "bento/ubuntu-20.04"
