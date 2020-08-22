@@ -1,0 +1,46 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+#
+# Plugin required:
+# vagrant plugin install vagrant-env
+#
+
+
+Vagrant.configure(2) do |config|
+  config.env.enable # enable plugin
+  
+  USERNAME = ENV['USER']
+  GH = ENV['GH']
+  SSH_PUB_KEYS = ENV['SSH_PUB_KEYS']
+  VM_BOX = ENV['VM_BOX']
+  VM_NAME = ENV['VM_NAME']
+
+  config.vm.box = VM_BOX
+  config.vm.network "public_network", type: "dhcp", bridge: "Intel(R) Wireless-AC 9560 160MHz"
+  config.vm.network "forwarded_port", guest: 8000, host: 15000, protocol: "tcp"
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = VM_NAME
+    vb.memory = 4096
+    vb.cpus = 2
+#    vb.customize [ "modifyvm", :id, "--uartmode1", "file", File::NULL ]
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+    vb.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
+    vb.customize ["modifyvm", :id, "--vrde", "off"]
+  end
+
+  config.vm.post_up_message = "run \"vagrant up --provision-with users\" after fisrts up"
+
+  config.vm.provision "users", type: "shell", path: "../scripts/users.sh",
+    env: {"USERNAME" => USERNAME, "GH" => GH, "SSH_PUB_KEYS" => SSH_PUB_KEYS},
+    privileged: true, run: "never", before: "all"
+
+  config.vm.provision "pkgs", type: "shell", path: "../scripts/pkgs.sh", before: "all", run: "once"
+
+  config.vm.provision "user-environment", type: "shell", path: "../scripts/environment.sh",
+    env: {"USERNAME" => USERNAME},
+    privileged: true, run: "never"
+
+  config.vm.provision "docker", type: "shell", path: "../scripts/bootstrap-docker.sh", run: "never"
+
+end

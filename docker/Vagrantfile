@@ -6,45 +6,42 @@
 # vagrant plugin install vagrant-env
 #
 
-USERNAME = ENV['USER']
-GH = ENV['GH']
-SSH_PUB_KEYS = ENV['SSH_PUB_KEYS']
-VM_BOX = ENV['VM_BOX']
-VB_NAME = ENV['VB_NAME']
-
-
-bootstrap = <<SCRIPT
-  useradd -d /home/#{USERNAME} -s /bin/bash -m #{USERNAME} --groups sudo
-  echo "%#{USERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/#{USERNAME}
-  mkdir -p /home/#{USERNAME}/.ssh
-  chown -R #{USERNAME}:#{USERNAME} /home/#{USERNAME}
-  echo "#{SSH_PUB_KEYS}" > /home/#{USERNAME}/.ssh/authorized_keys
-  # ssh-import-id-gh #{GH}
-  # sed -i "s@http:\/\/ar/http:\/\@ru.ar@g" /etc/apt/sources.list
-SCRIPT
-
 
 Vagrant.configure(2) do |config|
+  config.env.enable # enable plugin
+  
+  USERNAME = ENV['USER']
+  GH = ENV['GH']
+  SSH_PUB_KEYS = ENV['SSH_PUB_KEYS']
+  VM_BOX = ENV['VM_BOX']
+  VM_NAME = ENV['VM_NAME']
+
   config.vm.box = VM_BOX
   config.vm.provider "virtualbox" do |vb|
-    vb.name = VB_NAME
-    vb.memory = 16384
-    vb.cpus = 8
+    vb.name = VM_NAME
+    vb.memory = 4096
+    vb.cpus = 2
 #    vb.customize [ "modifyvm", :id, "--uartmode1", "file", File::NULL ]
-#    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-#    vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+    vb.customize ["modifyvm", :id, "--natdnsproxy1", "off"]
+    vb.customize ["modifyvm", :id, "--vrde", "off"]
   end
 
-  config.vm.provision :shell, path: "bootstrap-docker.sh"
+  config.vm.provision :shell, path: "../scripts/bootstrap-docker.sh"
 
-  config.vm.provision "shell" do |s|
-#    ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
-    s.inline = <<-SHELL
-      #echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
-      #echo #{ssh_pub_key} >> /root/.ssh/authorized_keys
-      ssh-import-id-gh #{GH}
-    SHELL
-  end
+bootstrap = <<SCRIPT
+    useradd -d /home/#{USERNAME} -s /bin/bash -m #{USERNAME} --groups sudo
+    echo "%#{USERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/#{USERNAME}
+    mkdir -p /home/#{USERNAME}/.ssh
+    chown -R #{USERNAME}:#{USERNAME} /home/#{USERNAME}
+    su #{USERNAME} -c 'echo "#{SSH_PUB_KEYS}" >> /home/#{USERNAME}/.ssh/authorized_keys'
+    su #{USERNAME} -c 'ssh-import-id-gh #{GH}'
+    mkdir /root/.ssh
+    cat /home/#{USERNAME}/.ssh/authorized_keys >> /root/.ssh/authorized_keys
+    chmod -R 700 /root/.ssh
+    cat /home/#{USERNAME}/.ssh/authorized_keys >> /home/vagrant/.ssh/authorized_keys
+    # sed -i "s@http:\/\/ar/http:\/\@ru.ar@g" /etc/apt/sources.list
+SCRIPT
 
   config.vm.provision "shell", inline: "#{bootstrap}", privileged: true
 

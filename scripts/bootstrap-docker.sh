@@ -22,3 +22,4 @@ sudo curl -sL "https://github.com/docker/compose/releases/download/1.25.0/docker
 chmod +x /usr/local/bin/docker-compose
 
 usermod -aG docker vagrant
+usermod -aG docker $USERNAME
