@@ -1,4 +1,4 @@
-useradd -d /home/$USERNAME -s /bin/zsh -m $USERNAME --groups sudo
+useradd -d /home/$USERNAME -s /bin/fish -m $USERNAME --groups sudo
 echo "%$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$USERNAME
 mkdir -p /home/$USERNAME/.ssh
 chown -R $USERNAME:$USERNAME /home/$USERNAME
