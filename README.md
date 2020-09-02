@@ -20,12 +20,8 @@ VM_BOX = "bento/ubuntu-20.04"
 VM_NAME = "myvmhostname"
 ```
 
-USER - user name which would be created during provisioning
-
-GH - your github username to import public keys
-
-SSH_PUB_KEYS - additional keys. Use '\n' separator for multiple keys
-
-VM_BOX - box name to initialize virtual machine
-
-VM_NAME - will be used in virtual box vm name and as a hostname
+USER - user name which would be created during provisioning  
+GH - your github username to import public keys  
+SSH_PUB_KEYS - additional keys. Use '\n' separator for multiple keys  
+VM_BOX - box name to initialize virtual machine  
+VM_NAME - will be used in virtual box vm name and as a hostname  
