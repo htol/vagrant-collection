@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # enable forwarding
 sysctl net.ipv4.ip_forward=1
 
