@@ -5,6 +5,11 @@
 # Plugin required:
 # vagrant plugin install vagrant-env
 #
+# If you want to use nfs under windows
+# vagrant plugin install vagrant-winnfsd
+#
+
+require '../lib/utils.rb'
 
 
 Vagrant.configure(2) do |config|
@@ -18,9 +23,18 @@ Vagrant.configure(2) do |config|
 
   config.vm.box = VM_BOX
   config.vm.hostname = VM_NAME
+  config.vm.box_check_update = false
 
+  config.vm.network "private_network", ip: "192.168.171.10", name: "VirtualBox Host-Only Ethernet Adapter"
+  config.vm.network "public_network", ip: "192.168.55.13", name: "Intel(R) I211 Gigabit Network Connection"
   config.vm.network "forwarded_port", guest: 3000, host: 15000, protocol: "tcp"
   config.vm.network "forwarded_port", guest: 80, host: 15001, protocol: "tcp"
+  config.vm.network "forwarded_port", guest: 8989, host: 8989, protocol: "tcp"
+  config.vm.network "forwarded_port", guest: 9117, host: 9117, protocol: "tcp"
+
+
+  # config.vm.network "private_network", type: "dhcp" # already have one
+  #nfs_under_windows(config.vm)
 
   config.vm.provider "virtualbox" do |vb|
     vb.name = VM_NAME
